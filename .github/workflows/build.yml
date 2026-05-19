@@ -1,0 +1,25 @@
+name: Build Custom MicroPython
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: v5.2.1
+          target: esp32c3
+
+      - name: Build
+        run: |
+          cd ports/esp32
+          make BOARD=ESP32_GENERIC_C3
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: firmware
+          path: ports/esp32/build-ESP32_GENERIC_C3/firmware.bin
