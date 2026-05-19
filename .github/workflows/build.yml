@@ -8,6 +8,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: false
+          fetch-depth: 1
 
       - name: Install dependencies
         run: |
@@ -16,9 +17,7 @@ jobs:
             python3-pip python3-venv cmake ninja-build libffi-dev libssl-dev
 
       - name: Init ESP-IDF submodule
-        run: |
-          git submodule init
-          git submodule update lib/esp-idf
+        run: git submodule update --init -- lib/esp-idf
 
       - name: Init port submodules
         run: make -C ports/esp32 BOARD=ESP32_GENERIC_C3 submodules
