@@ -7,17 +7,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: recursive
+          submodules: false
 
-      - uses: espressif/esp-idf-ci-action@v1
-        with:
-          esp_idf_version: v5.2.1
-          target: esp32c3
-
-      - name: Build
+      - name: Install dependencies
         run: |
-          cd ports/esp32
-          make BOARD=ESP32_GENERIC_C3
+          sudo apt-get update
+          sudo apt-get install -y gcc git wget flex bison gperf python3 \
+            python3-pip python3-venv cmake ninja-build libffi-dev libssl-dev
+
+      - name: Init ESP-IDF submodule
+        run: git submodule update --init lib/esp-idf
+
+      - name: Init port submodules
+        run: make -C ports/esp32 BOARD=ESP32_GENERIC_C3 submodules
+
+      - name: Install ESP-IDF tools
+        run: |
+          cd lib/esp-idf
+          ./install.sh esp32c3
+
+      - name: Build mpy-cross
+        run: make -C mpy-cross
+
+      - name: Build firmware
+        run: |
+          . lib/esp-idf/export.sh
+          make -C ports/esp32 BOARD=ESP32_GENERIC_C3
 
       - uses: actions/upload-artifact@v4
         with:
